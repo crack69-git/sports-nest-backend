@@ -27,6 +27,14 @@ async function run() {
     const productsCollection = database.collection("products");
     const myBookingsCollection = database.collection("myBookings");
 
+    app.delete("/mybookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await myBookingsCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send(result);
+    });
+
     app.post("/mybookings", async (req, res) => {
       const booking = req.body;
       const result = await myBookingsCollection.insertOne(booking);
