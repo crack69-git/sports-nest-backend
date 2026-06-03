@@ -32,10 +32,11 @@ async function run() {
       const result = await myBookingsCollection.insertOne(booking);
       res.send(result);
     });
-    app.get("/mybookings", async (req, res) => {
-      const email = req.query.email;
-      const query = { email: email };
-      const result = await myBookingsCollection.find(query).toArray();
+    app.get("/mybookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await myBookingsCollection
+        .find({ email_id: id })
+        .toArray();
       res.send(result);
     });
 
