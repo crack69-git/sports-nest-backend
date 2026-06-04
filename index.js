@@ -48,6 +48,16 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/manageFacilities/:id", async (req, res) => {
+      const id = req.params.id; // id = the email passed in the URL
+      const result = await productsCollection
+        .find({
+          userId: id, // Match documents where email_id equals that email
+        })
+        .toArray();
+      res.send(result);
+    });
+
     app.get("/product/:id", async (req, res) => {
       const id = req.params.id;
       const result = await productsCollection.findOne({
