@@ -58,14 +58,25 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/product/:id", async (req, res) => {
-      const id = req.params.id;
-      const result = await productsCollection.findOne({
-        _id: new ObjectId(id),
-      });
-      // json.stringify(result);
-      res.send(result);
-    });
+    app.get(
+      "/product/:id",
+      (req, res, next) => {
+        const header = req.headers.authorization;
+        if (header === "logged in") {
+          next();
+        } else {
+          res.status(401).send({ message: "Unauthorized" });
+        }
+      },
+      async (req, res) => {
+        const id = req.params.id;
+        const result = await productsCollection.findOne({
+          _id: new ObjectId(id),
+        });
+        // json.stringify(result);
+        res.send(result);
+      },
+    );
 
     app.patch("/product/:id", async (req, res) => {
       const id = req.params.id;
