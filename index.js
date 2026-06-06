@@ -9,6 +9,7 @@ dotenv.config();
 // require("dotenv").config();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri, {
   serverApi: {
@@ -27,6 +28,26 @@ async function run() {
     const productsCollection = database.collection("products");
     const myBookingsCollection = database.collection("myBookings");
 
+    const JWKS = createRemoteJWKSet(
+      new URL(`http://localhost:3000/api/auth/jwks`),
+    );
+
+    const verifyToken = async (req, res, next) => {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+      const token = authHeader.split(" ")[1];
+      if (!token) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+      try {
+        const { payload } = await jwtVerify(token, JWKS);
+        next();
+      } catch (error) {
+        return res.status(401).send({ message: "Forbidden" });
+      }
+    };
     app.delete("/mybookings/:id", async (req, res) => {
       const id = req.params.id;
       const result = await myBookingsCollection.deleteOne({
@@ -58,25 +79,14 @@ async function run() {
       res.send(result);
     });
 
-    app.get(
-      "/product/:id",
-      (req, res, next) => {
-        const header = req.headers.authorization;
-        if (header === "logged in") {
-          next();
-        } else {
-          res.status(401).send({ message: "Unauthorized" });
-        }
-      },
-      async (req, res) => {
-        const id = req.params.id;
-        const result = await productsCollection.findOne({
-          _id: new ObjectId(id),
-        });
-        // json.stringify(result);
-        res.send(result);
-      },
-    );
+    app.get("/product/:id", verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const result = await productsCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      // json.stringify(result);
+      res.send(result);
+    });
 
     app.patch("/product/:id", async (req, res) => {
       const id = req.params.id;
