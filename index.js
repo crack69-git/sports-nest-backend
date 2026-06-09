@@ -111,10 +111,43 @@ async function run() {
       res.send(result);
     });
     app.get("/product", async (req, res) => {
+      try {
+        const { search, facilityType } = req.query;
+        const query = {};
+
+        // 1. Text match validation
+        if (search && search !== "undefined" && search.trim() !== "") {
+          query.facilityname = {
+            $regex: search.trim(),
+            $options: "i",
+          };
+        }
+
+        // 2. Exact match check with $in operator
+        if (
+          facilityType &&
+          facilityType !== "undefined" &&
+          facilityType.trim() !== ""
+        ) {
+          const typeArray = facilityType.split(",").map((t) => t.trim());
+          query.facilitytype = {
+            $in: typeArray,
+          };
+        }
+
+        console.log("MongoDB Filter Context Query:", JSON.stringify(query));
+
+        const result = await productsCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Internal Server Error" });
+      }
+    });
+    app.get("/feature", async (req, res) => {
       const result = await productsCollection.find().toArray();
       res.send(result);
     });
-
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     // console.log(
