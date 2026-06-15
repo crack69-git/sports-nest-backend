@@ -48,20 +48,24 @@ async function run() {
         return res.status(401).send({ message: "Forbidden" });
       }
     };
-    app.delete("/mybookings/:id", verifyToken, async (req, res) => {
+    app.delete("/mybookings/:id", async (req, res) => {
       const id = req.params.id;
       const result = await myBookingsCollection.deleteOne({
         _id: new ObjectId(id),
       });
       res.send(result);
     });
+    app.get("/mybookings", async (req, res) => {
+      const result = await myBookingsCollection.find().toArray();
+      res.send(result);
+    });
 
-    app.post("/mybookings", verifyToken, async (req, res) => {
+    app.post("/mybookings", async (req, res) => {
       const booking = req.body;
       const result = await myBookingsCollection.insertOne(booking);
       res.send(result);
     });
-    app.get("/mybookings/:id", verifyToken, async (req, res) => {
+    app.get("/mybookings/:id", async (req, res) => {
       const id = req.params.id;
       const result = await myBookingsCollection
         .find({ email_id: id })
@@ -69,7 +73,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/manageFacilities/:id", verifyToken, async (req, res) => {
+    app.get("/manageFacilities/:id", async (req, res) => {
       const id = req.params.id; // id = the email passed in the URL
       const result = await productsCollection
         .find({
@@ -88,7 +92,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/product/:id", verifyToken, async (req, res) => {
+    app.patch("/product/:id", async (req, res) => {
       const id = req.params.id;
       const updatedProduct = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -98,12 +102,12 @@ async function run() {
       const result = await productsCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
-    app.post("/product", verifyToken, async (req, res) => {
+    app.post("/product", async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
       res.send(result);
     });
-    app.delete("/product/:id", verifyToken, async (req, res) => {
+    app.delete("/product/:id", async (req, res) => {
       const id = req.params.id;
       const result = await productsCollection.deleteOne({
         _id: new ObjectId(id),
