@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 dotenv.config();
 // require("dotenv").config();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
 const uri = process.env.MONGODB_URI;
@@ -79,7 +79,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/product/:id", verifyToken, async (req, res) => {
+    app.get("/product/:id", async (req, res) => {
       const id = req.params.id;
       const result = await productsCollection.findOne({
         _id: new ObjectId(id),
