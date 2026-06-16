@@ -34,6 +34,7 @@ async function run() {
 
     const verifyToken = async (req, res, next) => {
       const authHeader = req.headers.authorization;
+      console.log(authHeader);
       if (!authHeader) {
         return res.status(401).send({ message: "Unauthorized" });
       }
@@ -55,7 +56,7 @@ async function run() {
       });
       res.send(result);
     });
-    app.get("/mybookings", verifyToken, async (req, res) => {
+    app.get("/mybookings", async (req, res) => {
       const result = await myBookingsCollection.find().toArray();
       res.send(result);
     });
@@ -65,7 +66,7 @@ async function run() {
       const result = await myBookingsCollection.insertOne(booking);
       res.send(result);
     });
-    app.get("/mybookings/:id", verifyToken, async (req, res) => {
+    app.get("/mybookings/:id", async (req, res) => {
       const id = req.params.id;
       const result = await myBookingsCollection
         .find({ email_id: id })
@@ -73,7 +74,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/manageFacilities/:id", verifyToken, async (req, res) => {
+    app.get("/manageFacilities/:id", async (req, res) => {
       const id = req.params.id; // id = the email passed in the URL
       const result = await productsCollection
         .find({
