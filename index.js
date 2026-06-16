@@ -120,27 +120,22 @@ async function run() {
         const { search, facilityType } = req.query;
         const query = {};
 
-        // 1. Text match validation
-        if (search && search !== "undefined" && search.trim() !== "") {
+        // Search filter
+        if (search?.trim()) {
           query.facilityname = {
             $regex: search.trim(),
             $options: "i",
           };
         }
 
-        // 2. Exact match check with $in operator
-        if (
-          facilityType &&
-          facilityType !== "undefined" &&
-          facilityType.trim() !== ""
-        ) {
-          const typeArray = facilityType.split(",").map((t) => t.trim());
+        // Select filter using $in
+        if (facilityType && facilityType !== "All" && facilityType.trim()) {
           query.facilitytype = {
-            $in: typeArray,
+            $in: [facilityType.trim()],
           };
         }
 
-        console.log("MongoDB Filter Context Query:", JSON.stringify(query));
+        console.log("Query:", query);
 
         const result = await productsCollection.find(query).toArray();
         res.send(result);
